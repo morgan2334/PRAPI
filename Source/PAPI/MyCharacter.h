@@ -18,10 +18,13 @@ class PAPI_API AMyCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMyCharacter();
+	
+	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Landed(const FHitResult& Hit)override;
 
 public:	
 	// Called every frame
@@ -45,5 +48,14 @@ private:
 		UCameraComponent*cam;
 	UPROPERTY()
 		USpringArmComponent* arm;
+	
+	UFUNCTION()
+		void DoubleJump();
 
+	UPROPERTY()
+		int DoubleJumpCounter;
+	UPROPERTY(EditAnywhere)
+		float JumpHeight;
+
+	
 };

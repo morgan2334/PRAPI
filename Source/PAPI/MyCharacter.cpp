@@ -2,6 +2,7 @@
 
 
 #include "MyCharacter.h"
+#include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -31,6 +32,10 @@ AMyCharacter::AMyCharacter()
 
 	cam->AttachTo(arm, USpringArmComponent::SocketName);
 	jumping = false;
+	JumpHeight = 600.f;
+	
+	
+
 }
 
 // Called when the game starts or when spawned
@@ -38,6 +43,11 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AMyCharacter::Landed(const FHitResult& Hit)
+{
+	DoubleJumpCounter = 0;
 }
 
 // Called every frame
@@ -60,8 +70,11 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	InputComponent->BindAxis("HorizontalRot", this, &AMyCharacter::HorizontalRot);
 	InputComponent->BindAxis("VerticalRot", this, &AMyCharacter::VertialRot);
 	
-	InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::CheckJump);
-	InputComponent->BindAction("Jump", IE_Released, this, &AMyCharacter::CheckJump);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::DoubleJump);
+	//InputComponent->BindAction("Sprint", IE_Pressed, this, &AMyCharacter::Sprint);
+	//InputComponent->BindAction("Sprint", IE_Released, this, &AMyCharacter::Walk);
+	//InputComponent->BindAction("Jump", IE_Released, this, &AMyCharacter::CheckJump);
+	
 }
 
 
@@ -87,6 +100,18 @@ void AMyCharacter::CheckJump()
 		jumping = true;
 	}
 }
+
+void AMyCharacter::DoubleJump()
+{
+	if (DoubleJumpCounter <= 1)
+	{
+		AMyCharacter::LaunchCharacter(FVector(0,0,JumpHeight),false,true);
+		DoubleJumpCounter++;
+	}
+	
+}
+
+
 
 void AMyCharacter::HorizontalRot(float value) 
 {
