@@ -3,6 +3,8 @@
 
 #include "MyCharacter.h"
 #include "Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h"
+#include "Runtime/Engine/Public/TimerManager.H"
+#include"Components/InputComponent.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -33,6 +35,12 @@ AMyCharacter::AMyCharacter()
 	cam->AttachTo(arm, USpringArmComponent::SocketName);
 	jumping = false;
 	JumpHeight = 600.f;
+
+	CanDash = true;
+	DashDistance = 6000.f;
+	DashCooldown = 1.f;
+	DashStop = 0.1f;
+
 	
 	
 
@@ -63,17 +71,21 @@ void AMyCharacter::Tick(float DeltaTime)
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	check(PlayerInputComponent);
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::DoubleJump);
 	InputComponent->BindAxis("Horizontal", this, &AMyCharacter::HorizontalMove);
 	InputComponent->BindAxis("Vertical", this, &AMyCharacter::VerticalMove);
 	InputComponent->BindAxis("HorizontalRot", this, &AMyCharacter::HorizontalRot);
 	InputComponent->BindAxis("VerticalRot", this, &AMyCharacter::VertialRot);
 	
-	InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::DoubleJump);
+	
+	
+	
+
 	//InputComponent->BindAction("Sprint", IE_Pressed, this, &AMyCharacter::Sprint);
 	//InputComponent->BindAction("Sprint", IE_Released, this, &AMyCharacter::Walk);
-	//InputComponent->BindAction("Jump", IE_Released, this, &AMyCharacter::CheckJump);
+	InputComponent->BindAction("Dash", IE_Pressed, this, &AMyCharacter::Dash);
 	
 }
 
@@ -110,6 +122,32 @@ void AMyCharacter::DoubleJump()
 	}
 	
 }
+
+void AMyCharacter::Dash()
+{
+	if (CanDash)
+	{
+		GetCharacterMovement()->BrakingFrictionFactor = 0.f;
+
+		LaunchCharacter(FVector(cam->GetForwardVector().X, cam->GetForwardVector().Y, 0).GetSafeNormal()*DashDistance, true, true);
+		CanDash = false;
+		GetWorldTimerManager().SetTimer(UnusedHandle, this, & AMyCharacter::StopDashing, DashStop, false);
+	}
+}
+
+void AMyCharacter::StopDashing()
+{
+	GetCharacterMovement()->StopMovementImmediately();
+	GetWorldTimerManager().SetTimer(UnusedHandle, this, &AMyCharacter::ResetDash, DashCooldown, false);
+	GetCharacterMovement()->BrakingFrictionFactor = 2.f;
+
+}
+
+void AMyCharacter::ResetDash()
+{
+	CanDash = true;
+}
+
 
 
 

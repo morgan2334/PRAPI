@@ -54,8 +54,29 @@ private:
 
 	UPROPERTY()
 		int DoubleJumpCounter;
+
 	UPROPERTY(EditAnywhere)
 		float JumpHeight;
 
+	UFUNCTION()
+		void Dash();
+
+	UPROPERTY(EditAnywhere)
+		float DashDistance;
+
+	UPROPERTY(EditAnywhere)
+		float DashCooldown;
+
+	UPROPERTY()
+		bool CanDash;
+	UPROPERTY(EditAnywhere)
+		float DashStop;
+
+	UPROPERTY()
+		FTimerHandle UnusedHandle;
 	
+	UFUNCTION()
+		void StopDashing();
+	UFUNCTION()
+		void ResetDash();
 };
